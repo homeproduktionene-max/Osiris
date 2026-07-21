@@ -1,7 +1,5 @@
 name: Windows
-
 on: [push, pull_request]
-
 jobs:
   msbuild:
     runs-on: ${{ matrix.os }}
@@ -20,6 +18,12 @@ jobs:
     - name: Build
       shell: cmd
       run: msbuild Osiris.sln /p:Platform=x64 /p:Configuration=${{ matrix.configuration }} ${{ env.toolset }}
+    - name: Upload artifact (msbuild)
+      uses: actions/upload-artifact@v4
+      with:
+        name: Osiris-msbuild-${{ matrix.os }}-${{ matrix.toolset }}-${{ matrix.configuration }}
+        path: x64/${{ matrix.configuration }}/
+        if-no-files-found: warn
 
   cmake:
     runs-on: ${{ matrix.os }}
@@ -45,3 +49,9 @@ jobs:
       run: ctest -R ^Unit --test-dir build -C ${{ matrix.configuration }} --output-on-failure --no-tests=error --schedule-random -j $env:NUMBER_OF_PROCESSORS
     - name: run functional tests
       run: ctest -R ^Functional --test-dir build -C ${{ matrix.configuration }} --output-on-failure --no-tests=error --schedule-random -j $env:NUMBER_OF_PROCESSORS
+    - name: Upload artifact (cmake)
+      uses: actions/upload-artifact@v4
+      with:
+        name: Osiris-cmake-${{ matrix.os }}-${{ matrix.toolset }}-${{ matrix.configuration }}
+        path: build/${{ matrix.configuration }}/
+        if-no-files-found: warn
